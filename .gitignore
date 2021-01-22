@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+tmp/
+osm/
+output/
+todo.md

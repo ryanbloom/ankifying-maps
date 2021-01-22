@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "anki-apkg-export": "^4.0.3",
+    "canvas": "^2.6.1",
+    "exifr": "^6.0.0",
+    "glob": "^7.1.6",
+    "heic-convert": "^1.2.4",
+    "kothic": "^0.2.7",
+    "minimist": "^1.2.5",
+    "node-fetch": "^2.6.1",
+    "osmtogeojson": "^3.0.0-beta.4",
+    "sharp": "^0.27.0",
+    "xmldom": "^0.4.0"
+  }
+}
