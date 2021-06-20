@@ -10,7 +10,18 @@ const { match } = require('./config/filter.js')
 
 const options = require('./config/options.js')
 
-const args = require('minimist')(process.argv.slice(2))
+const parseArgs = require('minimist')
+const featureTypes = ['roads', 'places']
+const opts = {
+    boolean: featureTypes,
+    default: {
+        roads: true,
+        places: true
+    }
+}
+const args = parseArgs(process.argv.slice(2), opts)
+const includedFeatureTypes = featureTypes.filter(t => args[t])
+
 let outputArg = args.o
 if (!outputArg) {
     if (!fs.existsSync('output')) {
@@ -29,7 +40,18 @@ function boundsAround(point) {
     }
 }
 
-const roads = ['Way', 'Street', 'Road', 'Drive', 'Boulevard', 'Lane']
+const roadWords = ['Way', 'Street', 'Road', 'Drive', 'Boulevard', 'Lane']
+function featureType(f) {
+    if (f.type == 'LineString') {
+        for (const roadWord of roadWords) {
+            if (f.properties.name.includes(roadWord)) {
+                return 'roads'
+            }
+        }
+    }
+    return 'places'
+}
+
 function valid(f) {
     if (!f.originalReprpoint || !f.properties.name) {
         return false
@@ -41,17 +63,8 @@ function valid(f) {
     if (f.properties.name.toLowerCase().startsWith('nameless')) {
         return false
     }
-    if (f.type == 'LineString') {
-        let isRoad = false
-        for (const road of roads) {
-            if (f.properties.name.includes(road)) {
-                isRoad = true
-                break
-            }
-        }
-        if (!isRoad) {
-            return false
-        }
+    if (f.type == 'LineString' && featureType(f) != 'roads') {
+        return false
     }
     return !match(f.properties, 'invalid')
 }
@@ -80,7 +93,7 @@ async function generate(source, deck, i) {
         maxlon: boundEl.getAttribute('maxlon')
     }
 
-    const minSize = 2*options.mapContextRadius
+    const minSize = 2 * options.mapContextRadius
     const latRange = bounds.maxlat - bounds.minlat
     const lonRange = bounds.maxlon - bounds.minlon
     if (latRange < minSize || lonRange < minSize) {
@@ -92,6 +105,9 @@ async function generate(source, deck, i) {
 
     for (const f of map.features) {
         if (!valid(f)) {
+            continue
+        }
+        if (!includedFeatureTypes.includes(featureType(f))) {
             continue
         }
         const zoomed = boundsAround(f.originalReprpoint)

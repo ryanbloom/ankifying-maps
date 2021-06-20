@@ -50,3 +50,7 @@ You can get an `.osm` file by using the Export button on
 [OpenStreetMap](https://openstreetmap.org). Note that features near the
 edge of the exported region (within `options.mapContextRadius`) will be
 excluded.
+
+Map features are identified as either roads or places. By default, cards will be
+generated for both. You can change this by passing `--places=false` or
+`--roads=false`.
